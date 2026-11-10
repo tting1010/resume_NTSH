@@ -17,7 +17,19 @@ zh_ko_dict = {
     "愛": "사랑"
 }
 
-
+# 建立中日題庫
+zh_jp_dict = {
+    "你好": "こんにちは",
+    "謝謝": "ありがとう",
+    "對不起": "ごめんなさい",
+    "早安": "おはようございます",
+    "晚安": "おやすみなさい",
+    "老師": "先生（せんせい）",
+    "學生": "学生（がくせい）",
+    "朋友": "友達（ともだち）",
+    "家人": "家族（かぞく）",
+    "愛": "愛（あい）"
+}
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -26,21 +38,54 @@ def index():
 def competition():
     return render_template('competition.html')
 
-# 使用 dict 作為中韓翻譯的題庫
+@app.route('/competition')
+def competition():
+    return render_template('competition.html')
+
+# 中韓、中日翻譯共用路由
 @app.route('/ask', methods=['GET', 'POST'])
 def ask():
+
     if request.method == 'POST':
-        # 2. 讀取學生的問題###^#@#Q%#@
-        question1 = request.form.get('question', '').strip()
-        # 3. 查詢題庫的對應答案
-        # answer1 = zh_ko_dict.get(question, "抱歉，我目前沒有這個詞的韓文對應。")
 
-        answer1 = zh_ko_dict[question1]
-        # 4. 回傳答案給學生
-        return render_template('ask.html', question=question1, answer=answer1)
+        # 讀取學生輸入的問題
+        question = request.form.get('question', '').strip()
+
+        # 讀取選擇的語言
+        language = request.form.get('language', 'ko')
+
+        # 根據語言選擇題庫
+        if language == 'ko':
+            dictionary = zh_ko_dict
+            language_name = "韓文"
+            template_name = "ask.html"
+
+        elif language == 'jp':
+            dictionary = zh_jp_dict
+            language_name = "日文"
+            template_name = "ask.html"
+
+        # 查詢答案
+        answer = dictionary.get(
+            question,
+            f"抱歉，我目前沒有這個詞的{language_name}對應。"
+        )
+
+        # 回傳答案
+        return render_template(
+            template_name,
+            question=question,
+            answer=answer,
+            language=language
+        )
+
     # GET 時給空白欄位
-    return render_template('ask.html', question="", answer="")
-
+    return render_template(
+        'ask.html',
+        question="",
+        answer="",
+        language="ko"
+    )
 
 
 #改成互動 3/17
